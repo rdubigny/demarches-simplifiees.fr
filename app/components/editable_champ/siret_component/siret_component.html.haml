@@ -1,5 +1,24 @@
-= @form.text_field(:value, input_opts(id: @champ.input_id, aria: { describedby: @champ.describedby_id }, placeholder: t(".placeholder"), data: { controller: 'turbo-input', turbo_input_load_on_connect_value: @champ.prefilled? && @champ.value.present? && @champ.etablissement.blank?, turbo_input_url_value: champs_siret_path(@champ.id) }, required: @champ.required?, pattern: "[0-9]{14}", title: t(".title"), class: "width-33-desktop", maxlength: 14))
-.spinner.right.hidden
+= @form.text_field(:value, input_opts(id: @champ.input_id, aria: { describedby: @champ.describedby_id }, placeholder: t(".placeholder"), required: @champ.required?, pattern: "[0-9]{14}", title: t(".title"), class: "width-33-desktop", maxlength: 14))
+- if @champ.fetch_external_data_pending?
+  .spinner.right
 .siret-info{ id: dom_id(@champ, :siret_info) }
   - if @champ.etablissement.present?
     = render EditableChamp::EtablissementTitreComponent.new(etablissement: @champ.etablissement)
+  - elsif @champ.fetch_external_data_retryable_exception? || @champ.fetch_external_data_final_exception?
+    - case @champ.external_data_exceptions.dig(:primary_endpoint, :type)
+    - when :invalid_length
+      %p.fr-error-text= t('errors.messages.invalid_siret_length')
+
+    - when :invalid_checksum
+      %p.fr-error-text= t('errors.messages.invalid_siret_checksum')
+
+    - when :not_found
+      %p.fr-error-text
+        Nous n’avons pas trouvé d’établissement correspondant à ce numéro de SIRET.
+        = link_to('Plus d’informations', t("links.common.faq.erreur_siret_url"), **external_link_attributes)
+
+    - when :network_error
+      %p.fr-error-text= t('errors.messages.siret_network_error')
+
+    - when :api_entreprise_down
+      %p.fr-error-text= t('errors.messages.api_entreprise_down')

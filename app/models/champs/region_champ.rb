@@ -4,6 +4,7 @@
 #
 #  id                             :integer          not null, primary key
 #  data                           :jsonb
+#  external_data_exceptions       :jsonb
 #  fetch_external_data_exceptions :string           is an Array
 #  prefilled                      :boolean          default(FALSE)
 #  private                        :boolean          default(FALSE), not null

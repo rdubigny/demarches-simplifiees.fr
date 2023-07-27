@@ -4,6 +4,7 @@
 #
 #  id                             :integer          not null, primary key
 #  data                           :jsonb
+#  external_data_exceptions       :jsonb
 #  fetch_external_data_exceptions :string           is an Array
 #  prefilled                      :boolean          default(FALSE)
 #  private                        :boolean          default(FALSE), not null
@@ -23,11 +24,32 @@
 class Champs::SiretChamp < Champ
   include SiretChampEtablissementFetchableConcern
 
+  after_validation :update_external_id
+
   def search_terms
     etablissement.present? ? etablissement.search_terms : [value]
   end
 
   def mandatory_blank?
     mandatory? && Siret.new(siret: value).invalid?
+  end
+
+  def fetchable_external_data?
+    true
+  end
+
+  def pollable_external_data?
+    true
+  end
+
+  def fetch_external_data
+    fetch_etablissement!(external_id, dossier.user)
+  end
+
+  def update_external_id
+    if value.present?
+      self.external_id = value
+      #self.etablissement = nil
+    end
   end
 end

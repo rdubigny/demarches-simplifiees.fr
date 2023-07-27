@@ -13,6 +13,8 @@ class ApplicationJob < ActiveJob::Base
       Sentry.set_tags(dossier: arg.id, procedure: arg.procedure.id)
     when Procedure
       Sentry.set_tags(procedure: arg.id)
+    when Champ
+      Sentry.set_tags(champ: arg.id)
     end
   end
 

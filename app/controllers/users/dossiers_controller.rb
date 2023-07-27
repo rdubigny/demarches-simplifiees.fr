@@ -276,6 +276,8 @@ module Users
 
       if errors.present?
         flash.now.alert = errors
+      else
+        @dossier.champs_public_all.each(&:fetch_external_data_later)
       end
 
       respond_to do |format|

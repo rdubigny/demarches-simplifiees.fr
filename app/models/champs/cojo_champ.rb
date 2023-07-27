@@ -1,3 +1,26 @@
+# == Schema Information
+#
+# Table name: champs
+#
+#  id                             :integer          not null, primary key
+#  data                           :jsonb
+#  external_data_exceptions       :jsonb
+#  fetch_external_data_exceptions :string           is an Array
+#  prefilled                      :boolean          default(FALSE)
+#  private                        :boolean          default(FALSE), not null
+#  rebased_at                     :datetime
+#  type                           :string
+#  value                          :string
+#  value_json                     :jsonb
+#  created_at                     :datetime
+#  updated_at                     :datetime
+#  dossier_id                     :integer
+#  etablissement_id               :integer
+#  external_id                    :string
+#  parent_id                      :bigint
+#  row_id                         :string
+#  type_de_champ_id               :integer
+#
 class Champs::COJOChamp < Champ
   store_accessor :value_json, :accreditation_number, :accreditation_birthdate
   store_accessor :data, :accreditation_success, :accreditation_first_name, :accreditation_last_name
@@ -22,11 +45,11 @@ class Champs::COJOChamp < Champ
     accreditation_success != true
   end
 
-  def fetch_external_data?
+  def fetchable_external_data?
     true
   end
 
-  def poll_external_data?
+  def pollable_external_data?
     true
   end
 

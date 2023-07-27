@@ -29,7 +29,7 @@ class API::Client
   end
 
   OK = Data.define(:body, :response)
-  Error = Data.define(:type, :code, :retryable, :reason)
+  Error = Data.define(:type, :code, :retryable, :attempts, :reason)
 
   def handle_response(response, schema:)
     if response.success?
@@ -43,17 +43,17 @@ class API::Client
         if !schema || schema.valid?(body)
           Success(OK[body.deep_symbolize_keys, response])
         else
-          Failure(Error[:schema, response.code, false, SchemaError.new(schema.validate(body))])
+          Failure(Error[:schema, response.code, false, 0, SchemaError.new(schema.validate(body))])
         end
       in Failure(reason)
-        Failure(Error[:json, response.code, false, reason])
+        Failure(Error[:json, response.code, false, 0, reason])
       end
     elsif response.timed_out?
-      Failure(Error[:timeout, response.code, true, HTTPError.new(response)])
+      Failure(Error[:timeout, response.code, true, 0, HTTPError.new(response)])
     elsif response.code != 0
-      Failure(Error[:http, response.code, true, HTTPError.new(response)])
+      Failure(Error[:http, response.code, true, 0, HTTPError.new(response)])
     else
-      Failure(Error[:network, response.code, true, HTTPError.new(response)])
+      Failure(Error[:network, response.code, true, 0, HTTPError.new(response)])
     end
   end
 

@@ -4,6 +4,7 @@
 #
 #  id                             :integer          not null, primary key
 #  data                           :jsonb
+#  external_data_exceptions       :jsonb
 #  fetch_external_data_exceptions :string           is an Array
 #  prefilled                      :boolean          default(FALSE)
 #  private                        :boolean          default(FALSE), not null
@@ -57,7 +58,7 @@ class Champs::AddressChamp < Champs::TextChamp
     address_label
   end
 
-  def fetch_external_data?
+  def fetchable_external_data?
     true
   end
 

@@ -4,6 +4,7 @@
 #
 #  id                             :integer          not null, primary key
 #  data                           :jsonb
+#  external_data_exceptions       :jsonb
 #  fetch_external_data_exceptions :string           is an Array
 #  prefilled                      :boolean
 #  private                        :boolean          default(FALSE), not null
@@ -103,7 +104,7 @@ class Champ < ApplicationRecord
   before_validation :set_dossier_id, if: :needs_dossier_id?
   before_save :cleanup_if_empty
   before_save :normalize
-  after_update_commit :fetch_external_data_later
+  #after_update_commit :fetch_external_data_later
 
   def public?
     !private?
@@ -214,32 +215,63 @@ class Champ < ApplicationRecord
     "#{html_id}-description" if description.present?
   end
 
-  def log_fetch_external_data_exception(exception)
-    exceptions = self.fetch_external_data_exceptions ||= []
-    exceptions << exception.inspect
-    update_column(:fetch_external_data_exceptions, exceptions)
+  def log_fetch_external_data_exception(error)
+    self.external_data_exceptions ||= {}
+    self.external_data_exceptions[:primary_endpoint] = {
+      type: error.type,
+      code: error.code,
+      retryable: error.retryable,
+      attempts: error.attempts
+    }
+    self.external_id = nil if !error.retryable
+    save!
   end
 
-  def fetch_external_data?
+  def fetchable_external_data?
     false
   end
 
-  def poll_external_data?
+  def pollable_external_data?
     false
   end
 
   def fetch_external_data_pending?
-    # We don't have a good mechanism right now to know if the last fetch has errored. So, in order
-    # to ensure we don't poll to infinity, we stop after 5 minutes no matter what.
-    fetch_external_data? && poll_external_data? && external_id.present? && data.nil? && updated_at > 5.minutes.ago
+    return false unless fetchable_external_data?
+    return false unless pollable_external_data?
+    return false unless external_data_requested?
+    return false if fetch_external_data_final_exception?
+    return true if fetch_external_data_retryable_exception?
+
+    data.nil?
+  end
+
+  def external_data_requested?
+    external_id.present?
+  end
+
+  def fetch_external_data_retryable_exception?
+    if external_data_exceptions.present? && external_data_exceptions[:primary_endpoint].present?
+      external_data_exceptions.dig(:primary_endpoint, :retryable) && external_data_exceptionsdig(:primary_endpoint, :attempts) < 5
+    end
+  end
+
+  def fetch_external_data_final_exception?
+    if external_data_exceptions.present? && external_data_exceptions[:primary_endpoint].present?
+      !external_data_exceptions.dig(:primary_endpoint, :retryable)
+    end
   end
 
   def fetch_external_data
     raise NotImplemented.new(:fetch_external_data)
   end
 
+  def fetch_external_data_error_message
+    raise NotImplemented.new(:fetch_external_data_error_message)
+  end
+
   def update_with_external_data!(data:)
-    update!(data: data)
+    update!(data: data,
+      external_data_exceptions: external_data_exceptions.merge(primary_endpoint: nil))
   end
 
   def clone(fork = false)
@@ -260,6 +292,12 @@ class Champ < ApplicationRecord
     public? && dossier.champ_forked_with_changes?(self)
   end
 
+  def fetch_external_data_later
+    if fetchable_external_data? && external_id.present? && data.nil?
+      ChampFetchExternalDataJob.perform_later(self, external_id)
+    end
+  end
+
   private
 
   def html_id
@@ -277,12 +315,6 @@ class Champ < ApplicationRecord
   def cleanup_if_empty
     if persisted? && external_id_changed?
       self.data = nil
-    end
-  end
-
-  def fetch_external_data_later
-    if fetch_external_data? && external_id.present? && data.nil?
-      ChampFetchExternalDataJob.perform_later(self, external_id)
     end
   end
 

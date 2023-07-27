@@ -1,7 +1,6 @@
 module SiretChampEtablissementFetchableConcern
   extend ActiveSupport::Concern
-
-  attr_reader :etablissement_fetch_error_key
+  include Dry::Monads[:result]
 
   def fetch_etablissement!(siret, user)
     return clear_etablissement!(:empty) if siret.empty?
@@ -10,14 +9,15 @@ module SiretChampEtablissementFetchableConcern
     return clear_etablissement!(:not_found) unless (etablissement = APIEntrepriseService.create_etablissement(self, siret, user&.id)) # i18n-tasks-use t('errors.messages.siret_not_found')
 
     update!(etablissement: etablissement)
+    Success({ siret: })
   rescue => error
     if error.try(:network_error?) && !APIEntrepriseService.api_up?
       # TODO: notify ops
       update!(
         etablissement: APIEntrepriseService.create_etablissement_as_degraded_mode(self, siret, user.id)
       )
-      @etablissement_fetch_error_key = :api_entreprise_down
-      false
+
+      Failure(API::Client::Error[:api_entreprise_down, 0, true, 0, error])
     else
       Sentry.capture_exception(error, extra: { dossier_id: dossier_id, siret: siret })
       clear_etablissement!(:network_error) # i18n-tasks-use t('errors.messages.siret_network_error')
@@ -26,14 +26,15 @@ module SiretChampEtablissementFetchableConcern
 
   private
 
-  def clear_etablissement!(error_key)
-    @etablissement_fetch_error_key = error_key
+  class SIRETError < StandardError
+  end
 
+  def clear_etablissement!(error_key)
     etablissement_to_destroy = etablissement
     update!(etablissement: nil)
     etablissement_to_destroy&.destroy
 
-    false
+    Failure(API::Client::Error[error_key, 0, false, 0, SIRETError.new('error!')])
   end
 
   def invalid_because?(siret, criteria)

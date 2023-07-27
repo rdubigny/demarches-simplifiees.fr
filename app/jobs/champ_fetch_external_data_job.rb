@@ -5,7 +5,6 @@ class ChampFetchExternalDataJob < ApplicationJob
     return if champ.external_id != external_id
     return if champ.data.present?
 
-    Sentry.set_tags(champ: champ.id)
     Sentry.set_extras(external_id:)
 
     result = champ.fetch_external_data
@@ -13,12 +12,17 @@ class ChampFetchExternalDataJob < ApplicationJob
     if result.is_a?(Dry::Monads::Result)
       case result
       in Success(data)
+        pp "success #{data}"
         champ.update_with_external_data!(data:)
       in Failure(retryable: true, reason:)
-        champ.log_fetch_external_data_exception(reason)
-        throw reason
+        error = result.failure
+        error.attempts = executions
+        pp "retryable failure #{error}"
+        champ.log_fetch_external_data_exception(error)
+        raise reason
       in Failure(retryable: false, reason:)
-        champ.log_fetch_external_data_exception(reason)
+        pp "failure #{result.failure}"
+        champ.log_fetch_external_data_exception(result.failure)
         Sentry.capture_exception(reason)
       end
     elsif result.present?

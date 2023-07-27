@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_18_113920) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_19_113920) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -224,6 +224,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_18_113920) do
     t.jsonb "data"
     t.integer "dossier_id"
     t.integer "etablissement_id"
+    t.jsonb "external_data_exceptions"
     t.string "external_id"
     t.string "fetch_external_data_exceptions", array: true
     t.bigint "parent_id"

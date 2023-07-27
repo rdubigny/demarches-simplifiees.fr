@@ -20,7 +20,7 @@ class COJOService
         accreditation_last_name: accreditation_success ? body[:lastName] : nil
       })
     in Failure(code:, reason:) if code.in?(401..403)
-      Failure(API::Client::Error[:unauthorized, code, false, reason])
+      Failure(API::Client::Error[:unauthorized, code, false, 0, reason])
     else
       result
     end
