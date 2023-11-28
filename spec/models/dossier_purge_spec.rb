@@ -18,4 +18,16 @@ describe Dossier, type: :model do
       Dossier.purge_discarded
     end
   end
+
+  describe '#purge_discarded' do
+    let(:dossier) { create(:dossier) }
+
+    it 'creates a deleted dossier, purge the dols and then destroy' do
+      expect(DeletedDossier).to receive(:create_from_dossier)
+      expect(dossier.dossier_operation_logs).to receive(:purge_discarded)
+      expect(dossier).to receive(:destroy)
+
+      dossier.purge_discarded
+    end
+  end
 end
