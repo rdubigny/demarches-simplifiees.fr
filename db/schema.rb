@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_11_28_071043) do
+ActiveRecord::Schema[7.0].define(version: 2023_12_12_133643) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -88,6 +88,21 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_28_071043) do
     t.index ["administrateur_id", "procedure_id"], name: "index_unique_admin_proc_couple", unique: true
     t.index ["administrateur_id"], name: "index_administrateurs_procedures_on_administrateur_id"
     t.index ["procedure_id"], name: "index_administrateurs_procedures_on_procedure_id"
+  end
+
+  create_table "agent_connect_informations", force: :cascade do |t|
+    t.string "belonging_population"
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "given_name", null: false
+    t.bigint "instructeur_id", null: false
+    t.string "organizational_unit"
+    t.string "phone"
+    t.string "siret"
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.string "usual_name", null: false
+    t.index ["instructeur_id"], name: "index_agent_connect_informations_on_instructeur_id"
   end
 
   create_table "api_tokens", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
