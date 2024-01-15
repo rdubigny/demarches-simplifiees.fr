@@ -178,6 +178,41 @@ describe Procedure do
       it { is_expected.to allow_value('Demande de subvention').for(:libelle) }
     end
 
+    context 'closing procedure' do
+      it { is_expected.not_to allow_value(nil).for(:closing_reason) }
+      it { is_expected.not_to allow_value('').for(:closing_reason) }
+
+      context 'replaced by external procedure' do
+        let(:procedure) { create(:procedure) }
+
+        context 'valid' do
+          before  do
+            procedure.update!(replaced_by_external_url: 'www.external_url.com', closing_reason: Procedure.closing_reasons.fetch(:external_procedure) )
+          end
+          it { expect(procedure).to be_valid }
+        end
+
+        context 'invalid' do
+          before  do
+            procedure.update(replaced_by_external_url: '', closing_reason: Procedure.closing_reasons.fetch(:external_procedure) )
+          end
+
+          it { expect(procedure).to be_invalid }
+        end
+      end
+
+      context 'without replacing procedure' do
+        let(:procedure) { create(:procedure) }
+
+        context 'valid' do
+          before  do
+            procedure.update!(replaced_by_external_url: nil, closing_reason: Procedure.closing_reasons.fetch(:other) )
+          end
+          it { expect(procedure).to be_valid }
+        end
+      end
+    end
+
     context 'description' do
       it { is_expected.not_to allow_value(nil).for(:description) }
       it { is_expected.not_to allow_value('').for(:description) }
