@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_10_113623) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_15_141520) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -829,6 +829,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_10_113623) do
     t.jsonb "chorus", default: {}, null: false
     t.boolean "cloned_from_library", default: false
     t.datetime "closed_at", precision: nil
+    t.string "closing_reason"
     t.datetime "created_at", precision: nil, null: false
     t.string "declarative_with_state"
     t.bigint "defaut_groupe_instructeur_id"
@@ -868,6 +869,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_10_113623) do
     t.boolean "procedure_expires_when_termine_enabled", default: true
     t.datetime "published_at", precision: nil
     t.bigint "published_revision_id"
+    t.string "replaced_by_external_url"
     t.bigint "replaced_by_procedure_id"
     t.boolean "routing_enabled"
     t.bigint "service_id"

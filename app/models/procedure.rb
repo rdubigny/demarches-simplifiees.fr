@@ -219,6 +219,12 @@ class Procedure < ApplicationRecord
     accepte:         'accepte'
   }
 
+  enum closing_reason: {
+    internal_procedure: 'internal_procedure',
+    external_procedure: 'external_procedure',
+    other: 'other'
+  }
+
   scope :for_api_v2, -> {
     includes(:draft_revision, :published_revision, administrateurs: :user)
   }
