@@ -14,6 +14,7 @@ fr:
           cadre_juridique: "Exemple: 'https://www.legifrance.gouv.fr/'"
           old_procedure: Cette démarche remplace une close ? Si oui, veuillez indiquer le n° de la démarche remplacée
           procedure_path: "Personnalisez si besoin la suite de l’URL, pour faciliter l'accès à la démarche. De 3 à 200 caractères :  minuscules, chiffres et tiret seulement"
+          replaced_by_external_url: "Exemple : http://lien-vers-ma-nouvelle-demarche.com"
         path: Lien public
         organisation: Organisme
         duree_conservation_dossiers_dans_ds: Durée de conservation des dossiers sur demarches-simplifiees.fr (choisi par un usager)
@@ -27,6 +28,7 @@ fr:
         lien_site_web: Où les usagers trouveront-ils le lien vers la démarche ?
         old_procedure: Numéro de la démarche remplacée
         new_procedure: Numéro de la nouvelle démarche
+        replaced_by_procedure_id: Nouvelle démarche
         replaced_by_external_url: URL de la nouvelle démarche hors Démarches simplifiées
         closing_reason: Raison de la clôture
         closing_reasons:
