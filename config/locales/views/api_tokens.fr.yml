@@ -7,3 +7,6 @@ fr:
       name-hint: 'exemples: prod orus, test presta'
       continue: continuer
       cancel: retour
+    autorisations:
+      cancel: retour
+      continue: continuer
