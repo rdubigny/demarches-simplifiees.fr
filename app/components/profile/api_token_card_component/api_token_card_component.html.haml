@@ -4,6 +4,8 @@
   %p
     = t('.first_paragraph_html', application_name: APPLICATION_NAME, api_doc_url: API_DOC_URL)
 
+  = link_to t('.create_token'), nom_api_tokens_path, class: "fr-btn fr-btn--secondary fr-mt-2w"
+
   %ul.fr-mt-4w
     - api_tokens.each do |api_token|
       = render Profile::APITokenComponent.new(api_token:)
