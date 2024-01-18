@@ -66,7 +66,7 @@ describe APIToken, type: :model do
           it do
             expect(api_token.full_access?).to be(true)
             expect(api_token.procedure_ids).to match_array([procedure.id, other_procedure.id])
-            expect(api_token.targetable_procedures).to eq([procedure, other_procedure])
+            expect(api_token.targetable_procedures).to match_array([procedure, other_procedure])
           end
         end
       end
