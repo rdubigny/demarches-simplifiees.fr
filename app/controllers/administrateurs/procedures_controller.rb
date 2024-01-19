@@ -334,6 +334,10 @@ module Administrateurs
           .update!(replaced_by_procedure: @procedure)
       end
 
+      # TO DO after data backfill
+      # add this condition before reset : if @procedure.closing_reason.present?
+      @procedure.reset_closing_params
+
       redirect_to admin_procedure_confirmation_path(@procedure)
     rescue ActiveRecord::RecordInvalid
       flash.alert = @procedure.errors.full_messages

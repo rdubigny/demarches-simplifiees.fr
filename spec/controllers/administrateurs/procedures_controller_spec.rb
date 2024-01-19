@@ -1064,6 +1064,27 @@ describe Administrateurs::ProceduresController, type: :controller do
         end
       end
 
+      context 'procedure was closed and is re opened' do
+        before do
+          procedure.publish!
+          procedure.update!(closing_reason: 'internal_procedure', replaced_by_procedure_id: procedure2.id)
+          procedure.close!
+          procedure.update!(closing_notification_brouillon: true, closing_notification_en_cours: true)
+          perform_request
+          procedure.reload
+          procedure2.reload
+        end
+
+        it 'publish the given procedure and reset closing params' do
+          expect(procedure.publiee?).to be_truthy
+          expect(procedure.path).to eq(path)
+          expect(procedure.closing_reason).to be_nil
+          expect(procedure.replaced_by_procedure_id).to be_nil
+          expect(procedure.closing_notification_brouillon).to be_falsy
+          expect(procedure.closing_notification_en_cours).to be_falsy
+        end
+      end
+
       context 'procedure path exists and is not owned by current administrator' do
         let(:path) { procedure3.path }
         let(:lien_site_web) { 'http://mon-site.gouv.fr' }

@@ -987,6 +987,10 @@ class Procedure < ApplicationRecord
     draft_revision.revision_types_de_champ_public.filter { _1.type_de_champ.header_section? }
   end
 
+  def reset_closing_params
+    update!(closing_reason: nil, replaced_by_external_url: nil, replaced_by_procedure_id: nil, closing_notification_brouillon: false, closing_notification_en_cours: false)
+  end
+
   private
 
   def pieces_jointes_list
