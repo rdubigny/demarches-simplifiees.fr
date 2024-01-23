@@ -1,0 +1,40 @@
+= render partial: 'administrateurs/breadcrumbs',
+  locals: { steps: [['Démarches', admin_procedures_back_path(@procedure)],
+                    [@procedure.libelle.truncate_words(10), admin_procedure_path(@procedure)],[t('administrateurs.procedures.close.page_title')]],
+            metadatas: true }
+
+.fr-container
+  .fr-grid-row
+    .fr-col-12.fr-col-offset-md-2.fr-col-md-8
+      %h1= t('administrateurs.procedures.closing_notification.page_title')
+      %h2.fr-h5= t('administrateurs.procedures.closing_notification.page_subtitle')
+
+      = form_for @procedure, url: admin_procedure_notify_after_closing_path(@procedure), method: :post do |f|
+
+        - if @users_brouillon_count != 0
+          = render Dsfr::ToggleComponent.new(form: f,
+            target: :closing_notification_brouillon,
+            title: t("administrateurs.procedures.closing_notification.email_toggle_brouillon", count: @users_brouillon_count),
+            toggle_labels: {checked: 'Oui', unchecked: 'Non'})
+
+          .fr-input-group
+            = label_tag :email_content_brouillon, t("administrateurs.procedures.closing_notification.email_content_brouillon"), class: "fr-label"
+            = text_area_tag :email_content_brouillon, '', class: "fr-input"
+
+        - if @users_en_cours_count != 0
+          = render Dsfr::ToggleComponent.new(form: f,
+            target: :closing_notification_en_cours,
+            title: t("administrateurs.procedures.closing_notification.email_toggle_en_cours", count: @users_en_cours_count),
+            toggle_labels: {checked: 'Oui', unchecked: 'Non'})
+
+
+          = render Dsfr::AlertComponent.new(state: :info, size: :sm, extra_class_names: 'fr-mb-2w') do |c|
+            - c.with_body do
+              %p
+                = t('administrateurs.procedures.closing_notification.callout_content')
+
+          .fr-input-group
+            = label_tag :email_content_en_cours, t("administrateurs.procedures.closing_notification.email_content_en_cours"), class: "fr-label"
+            = text_area_tag :email_content_en_cours, '', class: "fr-input"
+
+        = submit_tag  t('administrateurs.procedures.close.actions.notify_after_closing'), { class: "fr-btn", id: 'publish', data: { confirm:  "Voulez-vous vraiment informer les usagers ?", disable_with: "Envoi des notifications..."} }

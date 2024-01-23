@@ -195,8 +195,12 @@ module Administrateurs
 
       if procedure.update(closing_params)
         procedure.close!
-        flash.notice = "Démarche close"
-        redirect_to admin_procedures_path
+        if procedure.dossiers.not_archived.state_brouillon.present? || procedure.dossiers.not_archived.state_en_construction_ou_instruction?
+          redirect_to admin_procedure_closing_notification_path
+        else
+          flash.notice = "Démarche close"
+          redirect_to admin_procedures_path
+        end
       else
         flash.alert = procedure.errors.full_messages
         redirect_to admin_procedure_close_path
@@ -204,6 +208,38 @@ module Administrateurs
 
     rescue ActiveRecord::RecordNotFound
       flash.alert = 'Démarche inexistante'
+      redirect_to admin_procedures_path
+    end
+
+    def closing_notification
+      @procedure = current_administrateur.procedures.find(params[:procedure_id])
+      @users_brouillon_count = @procedure.dossiers.not_archived.state_brouillon.map(&:user).uniq.count
+      @users_en_cours_count = @procedure.dossiers.not_archived.state_en_construction_ou_instruction.map(&:user).uniq.count
+    end
+
+    def notify_after_closing
+      @procedure = current_administrateur.procedures.find(params[:procedure_id])
+      @procedure.update!(notification_closing_params)
+
+      if @procedure.closing_notification_brouillon?
+        users = @procedure.dossiers.not_archived.state_brouillon.map(&:user).uniq
+        content = params[:email_content_brouillon]
+        #TO DO faire ça en asynchrone avec un job
+        users.each do |user|
+          UserMailer.notify_after_closing(user, content, @procedure).deliver_later
+        end
+      end
+
+      if @procedure.closing_notification_en_cours?
+        users = @procedure.dossiers.not_archived.state_en_construction_ou_instruction.map(&:user).uniq
+        content = params[:email_content_en_cours]
+        #TO DO faire ça en asynchrone avec un job
+        users.each do |user|
+          UserMailer.notify_after_closing(user, content, @procedure).deliver_later
+        end
+      end
+
+      flash.notice = "Les emails sont en cours d'envoi"
       redirect_to admin_procedures_path
     end
 
@@ -530,6 +566,10 @@ module Administrateurs
         end
       end
       closing_params
+    end
+
+    def notification_closing_params
+      params.require(:procedure).permit(:closing_notification_brouillon, :closing_notification_en_cours)
     end
 
     def allow_decision_access_params

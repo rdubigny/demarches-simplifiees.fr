@@ -685,7 +685,7 @@ describe Administrateurs::ProceduresController, type: :controller do
 
       it 'archives the procedure' do
         expect(procedure.close?).to be_truthy
-        expect(response).to redirect_to :admin_procedures
+        expect(response).to redirect_to :admin_procedure_closing_notification
         expect(flash[:notice]).to have_content 'Démarche close'
       end
 
@@ -704,7 +704,7 @@ describe Administrateurs::ProceduresController, type: :controller do
 
       it 'archives the procedure' do
         expect(procedure.close?).to be_truthy
-        expect(response).to redirect_to :admin_procedures
+        expect(response).to redirect_to :admin_procedure_closing_notification
         expect(flash[:notice]).to have_content 'Démarche close'
       end
 
@@ -723,7 +723,7 @@ describe Administrateurs::ProceduresController, type: :controller do
 
       it 'archives the procedure' do
         expect(procedure.close?).to be_truthy
-        expect(response).to redirect_to :admin_procedures
+        expect(response).to redirect_to :admin_procedure_closing_notification
         expect(flash[:notice]).to have_content 'Démarche close'
       end
 
@@ -760,9 +760,23 @@ describe Administrateurs::ProceduresController, type: :controller do
         procedure.reload
       end
 
-      it 'redirects to admin procedures' do
-        expect(response).to redirect_to :admin_procedures
+      it 'closes the procedure without redirection to the new procedure in DS' do
+        expect(response).to redirect_to :admin_procedure_closing_notification
+        expect(flash[:notice]).to have_content 'Démarche close'
+        expect(procedure.replaced_by_procedure).to eq(nil)
       end
+    end
+  end
+
+  describe 'POST #notify_after_closing' do
+    let(:procedure_closed) { create(:procedure, :closed, administrateurs: [admin]) }
+
+    before do
+      post :notify_after_closing
+    end
+
+    it 'redirects to admin procedures' do
+      expect(response).to redirect_to :admin_procedures
     end
   end
 

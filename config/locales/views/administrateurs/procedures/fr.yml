@@ -7,6 +7,20 @@ fr:
         replacement_procedure_callout_content: Les dossiers en cours pourront être instruits, mais aucun nouveau dossier ne pourra plus être déposé.
         actions:
           close_procedure: Clore la démarche
+          notify_after_closing: Informer les usagers
+      closing_notification:
+        page_title: Alerter les usagers
+        page_subtitle: Votre démarche a bien été cloturée. Nous vous invitons à en informer les usagers.
+        callout_title: Gestion des dossiers
+        callout_content: Vous avez la possibilité de continuer à instruire les dossiers déposés. Si vous n’avez pas l’intention d’instruire ces dossiers, nous vous invitons à en informer les usagers.
+        email_toggle_brouillon:
+          one: Vous souhaitez envoyer un email à l'utilisateur avec un dossier en brouillon
+          other: Vous souhaitez envoyer un email aux %{count} utilisateurs avec un dossier en brouillon
+        email_content_brouillon: Contenu de l'email
+        email_toggle_en_cours:
+          one : Vous souhaitez envoyer un email à l'utilisateur avec un dossier déposé
+          other: Vous souhaitez envoyer un email aux %{count} utilisateurs avec un dossier déposé
+        email_content_en_cours: Contenu de l'email
       preview_unavailable: Aperçu non disponible car la démarche est mal configurée
       modifications:
         dossiers_en_construction_and_dossiers_en_instruction: Il y a %{en_construction_count} dossiers « en construction » et %{en_instruction_count} dossiers « en instruction » sur cette version de la démarche.
