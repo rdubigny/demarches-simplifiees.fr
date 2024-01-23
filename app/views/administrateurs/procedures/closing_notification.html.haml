@@ -9,15 +9,16 @@
       %h1= t('administrateurs.procedures.closing_notification.page_title')
       %h2.fr-h5= t('administrateurs.procedures.closing_notification.page_subtitle')
 
-      = form_for @procedure, url: admin_procedure_notify_after_closing_path(@procedure), method: :post do |f|
+      = form_for @procedure, url: admin_procedure_notify_after_closing_path(@procedure), method: :post, html: {"data-controller" => "closing-notification"} do |f|
 
         - if @users_brouillon_count != 0
           = render Dsfr::ToggleComponent.new(form: f,
             target: :closing_notification_brouillon,
             title: t("administrateurs.procedures.closing_notification.email_toggle_brouillon", count: @users_brouillon_count),
-            toggle_labels: {checked: 'Oui', unchecked: 'Non'})
+            toggle_labels: {checked: 'Oui', unchecked: 'Non'},
+            opt: {"closing-notification-target" => "brouillonToggle"})
 
-          .fr-input-group
+          .fr-input-group{"data-closing-notification-target" => "emailContentBrouillon"}
             = label_tag :email_content_brouillon, t("administrateurs.procedures.closing_notification.email_content_brouillon"), class: "fr-label"
             = text_area_tag :email_content_brouillon, '', class: "fr-input"
 
@@ -25,16 +26,16 @@
           = render Dsfr::ToggleComponent.new(form: f,
             target: :closing_notification_en_cours,
             title: t("administrateurs.procedures.closing_notification.email_toggle_en_cours", count: @users_en_cours_count),
-            toggle_labels: {checked: 'Oui', unchecked: 'Non'})
+            toggle_labels: {checked: 'Oui', unchecked: 'Non'},
+            opt: {"closing-notification-target" => "enCoursToggle"})
 
+          .fr-input-group{"data-closing-notification-target" => "emailContentEnCours"}
+            = label_tag :email_content_en_cours, t("administrateurs.procedures.closing_notification.email_content_en_cours"), class: "fr-label"
+            = text_area_tag :email_content_en_cours, '', class: "fr-input"
 
           = render Dsfr::AlertComponent.new(state: :info, size: :sm, extra_class_names: 'fr-mb-2w') do |c|
             - c.with_body do
               %p
                 = t('administrateurs.procedures.closing_notification.callout_content')
-
-          .fr-input-group
-            = label_tag :email_content_en_cours, t("administrateurs.procedures.closing_notification.email_content_en_cours"), class: "fr-label"
-            = text_area_tag :email_content_en_cours, '', class: "fr-input"
 
         = submit_tag  t('administrateurs.procedures.close.actions.notify_after_closing'), { class: "fr-btn", id: 'publish', data: { confirm:  "Voulez-vous vraiment informer les usagers ?", disable_with: "Envoi des notifications..."} }
