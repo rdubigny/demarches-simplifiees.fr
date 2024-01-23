@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_01_15_141520) do
+ActiveRecord::Schema[7.0].define(version: 2024_01_22_135754) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -829,6 +829,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_01_15_141520) do
     t.jsonb "chorus", default: {}, null: false
     t.boolean "cloned_from_library", default: false
     t.datetime "closed_at", precision: nil
+    t.boolean "closing_notification_brouillon", default: false, null: false
+    t.boolean "closing_notification_en_cours", default: false, null: false
     t.string "closing_reason"
     t.datetime "created_at", precision: nil, null: false
     t.string "declarative_with_state"
