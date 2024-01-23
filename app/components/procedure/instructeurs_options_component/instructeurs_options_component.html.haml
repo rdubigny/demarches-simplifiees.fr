@@ -14,6 +14,8 @@
           title: 'Autogestion des instructeurs',
           hint: "L’autogestion des instructeurs permet aux instructeurs de gérer eux-mêmes la liste des instructeurs de la démarche.#{ ' Lorsque la démarche est routée, l’autogestion est activée d’office et n’est pas désactivable.' if @procedure.routing_enabled? }",
           disabled: @procedure.routing_enabled?)
+
+  %hr
   %p.fr-mt-2w Routage
   %p.fr-mt-2w= t('.routing_configuration_notice_1')
   %p.fr-icon-info-line.fr-hint-text{ aria: { hidden: true } }

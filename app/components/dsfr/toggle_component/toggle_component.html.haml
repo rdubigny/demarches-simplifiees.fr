@@ -1,7 +1,8 @@
-.fr-toggle.fr-toggle--border-bottom.fr-toggle--label-left
+.fr-toggle.fr-toggle--label-left
   = @form.check_box @target, class: 'fr-toggle__input', disabled: @disabled
   = @form.label @target,
     @title,
     class: 'fr-toggle__label',
-    data: { 'fr-checked-label': 'Activé', 'fr-unchecked-label': 'Désactivé' }
-  %p.fr-hint-text= @hint
+    data: { 'fr-checked-label': toggle_labels[:checked], 'fr-unchecked-label': toggle_labels[:unchecked] }
+  - if @hint
+    %p.fr-hint-text= @hint
