@@ -3,6 +3,12 @@ class APIToken < ApplicationRecord
 
   belongs_to :administrateur, inverse_of: :api_tokens
 
+  scope :expiring_within, ->(window) { where(expires_at: (window.begin.from_now..window.end.from_now)) }
+  scope :with_expiration_notice_to_send_for, -> (window) do
+    expiring_within(window)
+      .where.not("'#{window.inspect}' = ANY (expiration_notices_sent)")
+  end
+
   before_save :sanitize_targeted_procedure_ids
 
   def context

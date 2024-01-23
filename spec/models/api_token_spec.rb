@@ -209,4 +209,67 @@ describe APIToken, type: :model do
       end
     end
   end
+
+  describe '#expiring_within' do
+    let(:api_token) { APIToken.generate(administrateur).first }
+
+    subject { APIToken.expiring_within(0.day..7.days) }
+
+    context 'when the token is not expiring' do
+      it { is_expected.to be_empty }
+    end
+
+    context 'when the token is expiring in the range' do
+      before { api_token.update!(expires_at: 1.day.from_now) }
+
+      it { is_expected.to eq([api_token]) }
+    end
+
+    context 'when the token is not expiring in the range' do
+      before { api_token.update!(expires_at: 8.day.from_now) }
+
+      it { is_expected.to be_empty }
+    end
+
+    context 'when the token is expired' do
+      before { api_token.update!(expires_at: 1.day.ago) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
+  describe '#with_expiration_notice_to_send_for' do
+    let(:api_token) { APIToken.generate(administrateur).first }
+    let(:window) { 0.day..7.days }
+
+    subject do
+      APIToken.with_expiration_notice_to_send_for(window)
+    end
+
+    context 'when the token is expiring in the range' do
+      before { api_token.update!(expires_at: 1.day.from_now) }
+
+      it do
+        is_expected.to eq([api_token])
+      end
+
+      context 'when the token has already been notified' do
+        before do
+          api_token.update!(expiration_notices_sent: [window.inspect])
+        end
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'when the token has already been notified for another window' do
+        before do
+          api_token.update!(expiration_notices_sent: [(7.day..1.month).inspect])
+        end
+
+        it do
+          is_expected.to eq([api_token])
+        end
+      end
+    end
+  end
 end
