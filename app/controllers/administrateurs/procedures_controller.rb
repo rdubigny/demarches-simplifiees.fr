@@ -224,19 +224,13 @@ module Administrateurs
       if @procedure.closing_notification_brouillon?
         users = @procedure.dossiers.not_archived.state_brouillon.map(&:user).uniq
         content = params[:email_content_brouillon]
-        #TO DO faire ça en asynchrone avec un job
-        users.each do |user|
-          UserMailer.notify_after_closing(user, content, @procedure).deliver_later
-        end
+        SendClosingNotificationJob.perform_later(users, content, @procedure)
       end
 
       if @procedure.closing_notification_en_cours?
         users = @procedure.dossiers.not_archived.state_en_construction_ou_instruction.map(&:user).uniq
         content = params[:email_content_en_cours]
-        #TO DO faire ça en asynchrone avec un job
-        users.each do |user|
-          UserMailer.notify_after_closing(user, content, @procedure).deliver_later
-        end
+        SendClosingNotificationJob.perform_later(users, content, @procedure)
       end
 
       flash.notice = "Les emails sont en cours d'envoi"
