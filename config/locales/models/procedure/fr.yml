@@ -27,6 +27,12 @@ fr:
         lien_site_web: Où les usagers trouveront-ils le lien vers la démarche ?
         old_procedure: Numéro de la démarche remplacée
         new_procedure: Numéro de la nouvelle démarche
+        replaced_by_external_url: URL de la nouvelle démarche hors Démarches simplifiées
+        closing_reason: Raison de la clôture
+        closing_reasons:
+          other: Autre
+          internal_procedure: Je remplace ma démarche par une autre dans Démarches simplifiées
+          external_procedure: Je remplace ma démarche par une autre sur une autre plateforme
         procedure_path: Lien de la démarche à diffuser aux usagers
         procedure_path_placeholder: nom-de-la-demarche
         cadre_juridique: Lien vers le texte

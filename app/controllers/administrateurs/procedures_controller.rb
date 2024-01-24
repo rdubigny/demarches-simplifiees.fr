@@ -193,15 +193,14 @@ module Administrateurs
     def archive
       procedure = current_administrateur.procedures.find(params[:procedure_id])
 
-      if params[:new_procedure].present?
-        new_procedure = current_administrateur.procedures.find(params[:new_procedure])
-        procedure.update!(replaced_by_procedure_id: new_procedure.id)
+      if procedure.update(closing_params)
+        procedure.close!
+        flash.notice = "Démarche close"
+        redirect_to admin_procedures_path
+      else
+        flash.alert = procedure.errors.full_messages
+        redirect_to admin_procedure_close_path
       end
-
-      procedure.close!
-
-      flash.notice = "Démarche close"
-      redirect_to admin_procedures_path
 
     rescue ActiveRecord::RecordNotFound
       flash.alert = 'Démarche inexistante'
@@ -325,6 +324,7 @@ module Administrateurs
 
     def close
       @published_procedures = current_administrateur.procedures.publiees.to_h { |p| ["#{p.libelle} (#{p.id})", p.id] }
+      @closing_reason_options = Procedure.closing_reasons.values.map { |reason | [I18n.t("activerecord.attributes.procedure.closing_reasons.#{reason}"), reason] }
     end
 
     def confirmation
@@ -518,6 +518,18 @@ module Administrateurs
 
     def publish_params
       params.permit(:path, :lien_site_web)
+    end
+
+    def closing_params
+      closing_params = params.require(:procedure).permit(:replaced_by_external_url, :closing_reason, :replaced_by_procedure_id)
+
+      replaced_by_procedure_id = closing_params[:replaced_by_procedure_id]
+      if replaced_by_procedure_id.present?
+        if !current_administrateur.procedures.find_by(id: replaced_by_procedure_id).present?
+          closing_params.delete(:replaced_by_procedure_id)
+        end
+      end
+      closing_params
     end
 
     def allow_decision_access_params

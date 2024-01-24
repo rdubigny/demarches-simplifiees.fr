@@ -10,13 +10,18 @@
 
       %p= t('administrateurs.procedures.close.replacement_procedure_title')
 
-      = form_tag admin_procedure_archive_path(@procedure), method: :put do
+      = form_for @procedure, url: admin_procedure_archive_path(@procedure), method: :put do |f|
+        .fr-select-group
+          = f.label :closing_reason, class: 'fr-label'
+          = f.select :closing_reason, options_for_select(@closing_reason_options), { include_blank: 'Veuillez sélectionner la raison de la clôture' }, { class: 'fr-select' }
         - if @published_procedures.present?
-          .fr-select-group
-            = label_tag :new_procedure, class: 'fr-label' do
-              = t('activerecord.attributes.procedure.new_procedure')
-              = t('utils.no_mandatory')
 
-            = select_tag :new_procedure, options_for_select(@published_procedures), include_blank: true, class: 'fr-select'
+          .fr-select-group
+            = f.label :replaced_by_procedure_id, class: 'fr-label' do
+              = t('activerecord.attributes.procedure.new_procedure')
+
+            = f.select :replaced_by_procedure_id, options_for_select(@published_procedures), { include_blank: true }, { class: 'fr-select' }
+
+          = render Dsfr::InputComponent.new(form: f, attribute: :replaced_by_external_url, input_type: :text_field, opts: {})
 
         = submit_tag  t('administrateurs.procedures.close.actions.close_procedure'), { class: "fr-btn", id: 'publish', data: { confirm:  "Voulez-vous vraiment clore la démarche ? \nLes dossiers en cours pourront être instruits, mais aucun nouveau dossier ne pourra plus être déposé.", disable_with: "Archivage..."} }

@@ -679,7 +679,7 @@ describe Administrateurs::ProceduresController, type: :controller do
 
     context 'when the admin is an owner of the procedure without procedure replacement' do
       before do
-        put :archive, params: { procedure_id: procedure.id }
+        put :archive, params: { procedure_id: procedure.id, procedure: { closing_reason: 'other' } }
         procedure.reload
       end
 
@@ -691,13 +691,14 @@ describe Administrateurs::ProceduresController, type: :controller do
 
       it 'does not have any replacement procedure' do
         expect(procedure.replaced_by_procedure).to be_nil
+        expect(procedure.closing_reason).to eq('other')
       end
     end
 
-    context 'when the admin is an owner of the procedure with procedure replacement' do
+    context 'when the admin is an owner of the procedure with procedure replacement in DS' do
       let(:new_procedure) { create(:procedure, :published, administrateur: admin, lien_site_web: lien_site_web) }
       before do
-        put :archive, params: { procedure_id: procedure.id, new_procedure: new_procedure }
+        put :archive, params: { procedure_id: procedure.id, procedure: { closing_reason: 'internal_procedure', replaced_by_procedure_id: new_procedure.id } }
         procedure.reload
       end
 
@@ -709,6 +710,27 @@ describe Administrateurs::ProceduresController, type: :controller do
 
       it 'does have a replacement procedure' do
         expect(procedure.replaced_by_procedure).to eq(new_procedure)
+        expect(procedure.closing_reason).to eq('internal_procedure')
+      end
+    end
+
+    context 'when the admin is an owner of the procedure with procedure replacement outside DS' do
+      let(:new_procedure) { create(:procedure, :published, administrateur: admin, lien_site_web: lien_site_web) }
+      before do
+        put :archive, params: { procedure_id: procedure.id, procedure: { closing_reason: 'external_procedure', replaced_by_external_url: 'new_url.com' } }
+        procedure.reload
+      end
+
+      it 'archives the procedure' do
+        expect(procedure.close?).to be_truthy
+        expect(response).to redirect_to :admin_procedures
+        expect(flash[:notice]).to have_content 'Démarche close'
+      end
+
+      it 'does have a replacement procedure' do
+        expect(procedure.replaced_by_procedure).to eq(nil)
+        expect(procedure.replaced_by_external_url).to eq('new_url.com')
+        expect(procedure.closing_reason).to eq('external_procedure')
       end
     end
 
@@ -719,13 +741,27 @@ describe Administrateurs::ProceduresController, type: :controller do
         sign_out(admin.user)
         sign_in(admin_2.user)
 
-        put :archive, params: { procedure_id: procedure.id }
+        put :archive, params: { procedure_id: procedure.id, procedure: { closing_reason: 'other' } }
         procedure.reload
       end
 
       it 'displays an error message' do
         expect(response).to redirect_to :admin_procedures
         expect(flash[:alert]).to have_content 'Démarche inexistante'
+      end
+    end
+
+    context 'when the admin is not an owner of the new procedure in DS' do
+      let(:admin_2) { create(:administrateur) }
+      let(:other_admin_procedure) { create(:procedure, :with_all_champs, administrateurs: [admin_2])}
+
+      before do
+        put :archive, params: { procedure_id: procedure.id, procedure: { closing_reason: 'internal_procedure', replaced_by_procedure_id: other_admin_procedure.id } }
+        procedure.reload
+      end
+
+      it 'redirects to admin procedures' do
+        expect(response).to redirect_to :admin_procedures
       end
     end
   end
